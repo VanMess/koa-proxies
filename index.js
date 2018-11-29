@@ -4,6 +4,7 @@
 const url = require('url')
 const HttpProxy = require('http-proxy')
 const pathMatch = require('path-match')
+const streamify = require('stream-array')
 
 /**
  * Constants
@@ -42,6 +43,10 @@ module.exports = (context, options) => (ctx, next) => {
       prev[cur] = opts[cur]
       return prev
     }, {})
+
+  if (typeof ctx.request.rawBody === 'string' && ctx.request.rawBody.length > 0) {
+    httpProxyOpts['buffer'] = streamify([ctx.request.rawBody])
+  }
 
   return new Promise((resolve, reject) => {
     ctx.req.oldPath = ctx.req.url
